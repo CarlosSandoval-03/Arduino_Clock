@@ -15,8 +15,11 @@ Button buttonTimeOption(6);
 Button buttonAlarmOption(5);
 Button buttonHours(4);
 Button buttonMinutes(3);
+const int switchPin = 2;
+const int ledPin = 12;
 
-Clock clock(&display, &currentTime, &alarmTime, &buttonTimeOption, &buttonAlarmOption, &buttonHours, &buttonMinutes);
+Clock clock(&display, &currentTime, &alarmTime, &buttonTimeOption, &buttonAlarmOption, &buttonHours, &buttonMinutes,
+						switchPin, ledPin);
 unsigned long currentMillis;
 
 void setup()

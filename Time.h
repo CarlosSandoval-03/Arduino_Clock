@@ -10,10 +10,10 @@ class Time {
 
 	public:
 	byte getHours();
-	void setHours(byte hours);
 	byte getMinutes();
-	void setMinutes(byte minutes);
 	byte getSeconds();
+	void setHours(byte hours);
+	void setMinutes(byte minutes);
 	void setSeconds(byte seconds);
 	void setTime(byte hours, byte minutes, byte seconds);
 	void incrementSeconds();

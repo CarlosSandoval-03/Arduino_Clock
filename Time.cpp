@@ -5,24 +5,24 @@ byte Time::getHours()
 	return hours;
 }
 
-void Time::setHours(byte hours)
-{
-	this->hours = hours;
-}
-
 byte Time::getMinutes()
 {
 	return minutes;
 }
 
-void Time::setMinutes(byte minutes)
-{
-	this->minutes = minutes;
-}
-
 byte Time::getSeconds()
 {
 	return seconds;
+}
+
+void Time::setHours(byte hours)
+{
+	this->hours = hours;
+}
+
+void Time::setMinutes(byte minutes)
+{
+	this->minutes = minutes;
 }
 
 void Time::setSeconds(byte seconds)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include <ArduinoTrace.h>
 
 #define FIRST_CHANGE_STATE 0
 #define DEBOUNCE_VALIDATION_STATE 1

@@ -1,6 +1,7 @@
 #include "Clock.h"
 
-Clock::Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA)
+Clock::Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA, int swtPin,
+						 int lPin)
 {
 	display = d;
 	currentTime = currT;
@@ -9,6 +10,8 @@ Clock::Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, 
 	btnMinutes = btnM;
 	btnTimeOption = btnT;
 	btnAlarmOption = btnA;
+	switchAlarmPin = swtPin;
+	ledPin = lPin;
 }
 
 // TODO: Documentar por que es necesario el isPressed
@@ -18,9 +21,9 @@ void Clock::handleHoursButton(Time *selectedTime, Button *btn, unsigned long cur
 		selectedTime->setHours(selectedTime->getHours() + 1);
 
 	if (btn->wasLongPressed()) {
-		if (currentMillis - lastUpdateTime >= LONGPRESS_UPDATE_DELAY) {
+		if (currentMillis - lastUpdateButtonTime >= LONGPRESS_UPDATE_DELAY) {
 			selectedTime->setHours(selectedTime->getHours() + 1);
-			lastUpdateTime = currentMillis;
+			lastUpdateButtonTime = currentMillis;
 		}
 	}
 
@@ -34,9 +37,9 @@ void Clock::handleMinutesButton(Time *selectedTime, Button *btn, unsigned long c
 		selectedTime->setMinutes(selectedTime->getMinutes() + 1);
 
 	if (btn->wasLongPressed()) {
-		if (currentMillis - lastUpdateTime >= LONGPRESS_UPDATE_DELAY) {
+		if (currentMillis - lastUpdateButtonTime >= LONGPRESS_UPDATE_DELAY) {
 			selectedTime->setMinutes(selectedTime->getMinutes() + 1);
-			lastUpdateTime = currentMillis;
+			lastUpdateButtonTime = currentMillis;
 		}
 	}
 
@@ -116,10 +119,25 @@ void Clock::displayAlarm()
 
 	display->setTextSize(2);
 	display->setCursor(80, 48);
-	if (true)
-		display->print("ON"); // TODO: Add Switch support
+	if (digitalRead(switchAlarmPin))
+		display->print("ON");
 	else
 		display->print("OFF");
+}
+
+void Clock::blinkLed(unsigned long currentMillis)
+{
+	static bool ledState = LOW;
+	if (!digitalRead(switchAlarmPin)) {
+		digitalWrite(ledPin, LOW);
+		return;
+	}
+
+	if (currentMillis - lastUpdateLedTime >= LED_BLINK_DELAY) {
+		lastUpdateLedTime = currentMillis;
+		ledState = !ledState;
+		digitalWrite(ledPin, ledState);
+	}
 }
 
 Display *Clock::getDisplay()
@@ -194,8 +212,19 @@ void Clock::setBtnAlarmOption(Button *btn)
 
 void Clock::init()
 {
+	pinMode(ledPin, OUTPUT);
+
 	currentTime->setTime(12, 1, 0);
 	alarmTime->setTime(12, 11, 0);
+}
+
+void Clock::checkAlarm()
+{
+	if (currentTime->getHours() != alarmTime->getHours() || currentTime->getMinutes() != alarmTime->getMinutes()) {
+		isAlarmActive = false;
+		return;
+	}
+	isAlarmActive = true;
 }
 
 void Clock::update(unsigned long currentMillis)
@@ -208,6 +237,11 @@ void Clock::update(unsigned long currentMillis)
 
 	// Check changes
 	checkButtons(currentMillis);
+	checkAlarm();
+
+	// Blink led
+	if (isAlarmActive)
+		blinkLed(currentMillis);
 }
 
 void Clock::draw()
