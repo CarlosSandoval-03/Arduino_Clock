@@ -3,6 +3,6 @@
 ## Roadmap
 
 - [x] Clock
-- [ ] Alarm
+- [x] Alarm
 - [ ] Animations
 - [ ] Migration to ESP-32
