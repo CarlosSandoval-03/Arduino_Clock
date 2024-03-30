@@ -4,5 +4,5 @@
 
 - [x] Clock
 - [x] Alarm
-- [ ] Animations
+- [x] Animations
 - [ ] Migration to ESP-32
