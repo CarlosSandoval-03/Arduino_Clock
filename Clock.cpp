@@ -1,7 +1,6 @@
 #include "Clock.h"
 
-Clock::Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA, int swtPin,
-						 int lPin)
+Clock::Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA, int swtPin, int lPin)
 {
 	display = d;
 	currentTime = currT;
@@ -128,15 +127,29 @@ void Clock::displayAlarm()
 void Clock::blinkLed(unsigned long currentMillis)
 {
 	static bool ledState = LOW;
-	if (!digitalRead(switchAlarmPin)) {
+	if (!digitalRead(switchAlarmPin))
+	{
 		digitalWrite(ledPin, LOW);
 		return;
 	}
-
-	if (currentMillis - lastUpdateLedTime >= LED_BLINK_DELAY) {
+	
+	if (currentMillis - lastUpdateLedTime >= LED_BLINK_DELAY)
+	{
 		lastUpdateLedTime = currentMillis;
 		ledState = !ledState;
 		digitalWrite(ledPin, ledState);
+	}
+}
+
+void Clock::blinkAnimation(unsigned long currentMillis)
+{
+	if (!isAlarmActive)
+		return;
+
+	if (currentMillis - lastAnimationTime >= ANIMATION_BLINK_DELAY && !isAnimActive)
+	{
+		// The last animation time is updated in draw function
+		isAnimActive = true;
 	}
 }
 
@@ -220,7 +233,8 @@ void Clock::init()
 
 void Clock::checkAlarm()
 {
-	if (currentTime->getHours() != alarmTime->getHours() || currentTime->getMinutes() != alarmTime->getMinutes()) {
+	if (currentTime->getHours() != alarmTime->getHours() || currentTime->getMinutes() != alarmTime->getMinutes())
+	{
 		isAlarmActive = false;
 		return;
 	}
@@ -238,14 +252,36 @@ void Clock::update(unsigned long currentMillis)
 	// Check changes
 	checkButtons(currentMillis);
 	checkAlarm();
-
+	
 	// Blink led
 	if (isAlarmActive)
 		blinkLed(currentMillis);
+	
+	// Animation setup
+	blinkAnimation(currentMillis);
 }
 
 void Clock::draw()
 {
+	// Setup animation
+	if (isAlarmActive && isAnimActive)
+	{
+		display->drawBitmap(32, 0, clarr[currFrame], FRAME_WIDTH, FRAME_HEIGHT, 1);
+		
+		// 1 iteration of animation
+		if (currFrame + 1 == FRAME_COUNT)
+		{
+			isAnimActive = false;
+			lastAnimationTime = millis();
+		}
+
+		// Update frame value
+		currFrame = (currFrame + 1) % FRAME_COUNT;
+
+		// Avoid print clock and alarm when the animation is active
+		return;
+	}
+
 	// Update memory display
 	displayTime();
 	displayAlarm();
