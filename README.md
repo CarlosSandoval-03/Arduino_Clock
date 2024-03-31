@@ -5,4 +5,4 @@
 - [x] Clock
 - [x] Alarm
 - [x] Animations
-- [ ] Migration to ESP-32
+- [x] Migration to ESP-32 (See `esp32-support` branch)
