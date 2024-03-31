@@ -78,6 +78,7 @@ for dir in "$@"; do
          \( -name '*.c' \
          -o -name '*.cc' \
          -o -name '*.cpp' \
+         -o -name '*.ino' \
          -o -name '*.h' \
          -o -name '*.hh' \
          -o -name '*.hpp' \) \

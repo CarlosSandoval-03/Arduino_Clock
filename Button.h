@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 #define FIRST_CHANGE_STATE 0
 #define DEBOUNCE_VALIDATION_STATE 1
