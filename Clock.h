@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Arduino.h"
+
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <TimerOne.h>
 
 #include "Display.h"
 #include "Time.h"
@@ -15,12 +16,12 @@
 #define LED_BLINK_DELAY 200
 #define ANIMATION_BLINK_DELAY 3000
 
-class Clock {
+class Main_Clock {
 	private:
 	/** 
-   * The Clock class will only manipulate the Display memory, it will not be in charge of cleaning
-   * the screen or transferring the information in the memory to the screen
-   */
+   	 * The Clock class will only manipulate the Display memory, it will not be in charge of cleaning
+   	 * the screen or transferring the information in the memory to the screen
+   	 */
 	Display *display;
 	Time *currentTime;
 	Time *alarmTime;
@@ -50,8 +51,8 @@ class Clock {
 	void blinkAnimation(unsigned long currentMillis);
 
 	public:
-	Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA, int swtPin,
-				int lPin);
+	Main_Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA, int swtPin,
+						 int lPin);
 	Display *getDisplay();
 	Time *getTimeObj();
 	Time *getAlarmObj();
