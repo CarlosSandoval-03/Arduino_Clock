@@ -18,9 +18,9 @@
 class Clock {
 	private:
 	/** 
-   	 * The Clock class will only manipulate the Display memory, it will not be in charge of cleaning
-   	 * the screen or transferring the information in the memory to the screen
-   	 */
+   * The Clock class will only manipulate the Display memory, it will not be in charge of cleaning
+   * the screen or transferring the information in the memory to the screen
+   */
 	Display *display;
 	Time *currentTime;
 	Time *alarmTime;
@@ -34,7 +34,7 @@ class Clock {
 	unsigned long lastUpdateButtonTime = 0;
 	unsigned long lastUpdateLedTime = 0;
 	boolean isAlarmActive = false;
-	
+
 	int currFrame = 0;
 	boolean isAnimActive = false;
 	unsigned long lastAnimationTime = 0;
@@ -50,7 +50,8 @@ class Clock {
 	void blinkAnimation(unsigned long currentMillis);
 
 	public:
-	Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA, int swtPin, int lPin);
+	Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA, int swtPin,
+				int lPin);
 	Display *getDisplay();
 	Time *getTimeObj();
 	Time *getAlarmObj();

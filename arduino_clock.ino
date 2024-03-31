@@ -6,21 +6,26 @@
 #include "Button.h"
 #include "Clock.h"
 
+#define START_ANIM_POS_X 32
+#define START_ANIM_POS_Y 0
+
 void updateTime();
 
 Display display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Time currentTime;
 Time alarmTime;
-Button buttonTimeOption(6);
-Button buttonAlarmOption(5);
-Button buttonHours(4);
-Button buttonMinutes(3);
+Button buttonTimeOption(4);
+Button buttonAlarmOption(3);
+Button buttonHours(6);
+Button buttonMinutes(5);
 const int switchPin = 2;
 const int ledPin = 12;
 
-Clock clock(&display, &currentTime, &alarmTime, &buttonTimeOption, &buttonAlarmOption, &buttonHours, &buttonMinutes,
+Clock clock(&display, &currentTime, &alarmTime, &buttonHours, &buttonMinutes, &buttonTimeOption, &buttonAlarmOption,
 						switchPin, ledPin);
 unsigned long currentMillis;
+
+int start_frame = 0;
 
 void setup()
 {
