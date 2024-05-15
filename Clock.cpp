@@ -1,21 +1,21 @@
 #include "Clock.h"
 
-Clock::Clock(Display *d, Time *currT, Time *alarmT, Button *btnH, Button *btnM, Button *btnT, Button *btnA, int swtPin,
-						 int lPin)
+MainClock::MainClock(ClockConfig *config)
 {
-	display = d;
-	currentTime = currT;
-	alarmTime = alarmT;
-	btnHours = btnH;
-	btnMinutes = btnM;
-	btnTimeOption = btnT;
-	btnAlarmOption = btnA;
-	switchAlarmPin = swtPin;
-	ledPin = lPin;
+	display = config->display;
+	currentTime = config->currentTime;
+	alarmTime = config->alarmTime;
+	btnHours = config->btnHours;
+	btnMinutes = config->btnMinutes;
+	btnTimeOption = config->btnTimeOption;
+	btnAlarmOption = config->btnAlarmOption;
+	switchAlarmPin = config->switchAlarmPin;
+	ledPin = config->ledPin;
+	buzzerpin = config->buzzerpin;
 }
 
 // TODO: Documentar por que es necesario el isPressed
-void Clock::handleHoursButton(Time *selectedTime, Button *btn, unsigned long currentMillis)
+void MainClock::handleHoursButton(Time *selectedTime, Button *btn, unsigned long currentMillis)
 {
 	if (btn->isPressed())
 		selectedTime->setHours(selectedTime->getHours() + 1);
@@ -31,7 +31,7 @@ void Clock::handleHoursButton(Time *selectedTime, Button *btn, unsigned long cur
 		selectedTime->setHours(0);
 }
 
-void Clock::handleMinutesButton(Time *selectedTime, Button *btn, unsigned long currentMillis)
+void MainClock::handleMinutesButton(Time *selectedTime, Button *btn, unsigned long currentMillis)
 {
 	if (btn->isPressed())
 		selectedTime->setMinutes(selectedTime->getMinutes() + 1);
@@ -47,7 +47,7 @@ void Clock::handleMinutesButton(Time *selectedTime, Button *btn, unsigned long c
 		selectedTime->setMinutes(0);
 }
 
-void Clock::setTime(unsigned long currentMillis)
+void MainClock::setTime(unsigned long currentMillis)
 {
 	currentTime->setSeconds(0);
 
@@ -58,7 +58,7 @@ void Clock::setTime(unsigned long currentMillis)
 	}
 }
 
-void Clock::setAlarm(unsigned long currentMillis)
+void MainClock::setAlarm(unsigned long currentMillis)
 {
 	alarmTime->setSeconds(0);
 
@@ -69,7 +69,7 @@ void Clock::setAlarm(unsigned long currentMillis)
 	}
 }
 
-void Clock::checkButtons(unsigned long currentMillis)
+void MainClock::checkButtons(unsigned long currentMillis)
 {
 	// Avoid collisions
 	if (btnTimeOption->wasPressed() && btnAlarmOption->wasPressed()) {
@@ -77,14 +77,17 @@ void Clock::checkButtons(unsigned long currentMillis)
 		return;
 	}
 
+	clockState = NORMAL_OPTION;
 	if (btnTimeOption->wasPressed()) {
+		clockState = (clockState != CLOCK_OPTION) ? CLOCK_OPTION : NORMAL_OPTION;
 		setTime(currentMillis);
 	} else if (btnAlarmOption->wasPressed()) {
+		clockState = (clockState != ALARM_OPTION) ? ALARM_OPTION : NORMAL_OPTION;
 		setAlarm(currentMillis);
 	}
 }
 
-void Clock::displayTime()
+void MainClock::displayTime()
 {
 	display->setTextSize(2);
 	display->setTextColor(WHITE);
@@ -99,9 +102,17 @@ void Clock::displayTime()
 	display->print(":");
 	display->print(currentTime->getSeconds() < 10 ? "0" : "");
 	display->print(currentTime->getSeconds());
+
+	// Change indicator
+	if (clockState == CLOCK_OPTION) {
+		display->setTextSize(2);
+		display->setTextColor(WHITE);
+		display->setCursor(110, 2);
+		display->print("T");
+	}
 }
 
-void Clock::displayAlarm()
+void MainClock::displayAlarm()
 {
 	display->setTextSize(1);
 	display->setTextColor(WHITE);
@@ -123,13 +134,22 @@ void Clock::displayAlarm()
 		display->print("ON");
 	else
 		display->print("OFF");
+
+	// Change indicator
+	if (clockState == ALARM_OPTION) {
+		display->setTextSize(2);
+		display->setTextColor(WHITE);
+		display->setCursor(110, 2);
+		display->print("A");
+	}
 }
 
-void Clock::blinkLed(unsigned long currentMillis)
+void MainClock::blinkLed(unsigned long currentMillis)
 {
 	static bool ledState = LOW;
 	if (!digitalRead(switchAlarmPin)) {
 		digitalWrite(ledPin, LOW);
+		Serial.println("S-OFF");
 		return;
 	}
 
@@ -137,10 +157,29 @@ void Clock::blinkLed(unsigned long currentMillis)
 		lastUpdateLedTime = currentMillis;
 		ledState = !ledState;
 		digitalWrite(ledPin, ledState);
+		Serial.println(ledState ? "ON" : "OFF");
 	}
 }
 
-void Clock::blinkAnimation(unsigned long currentMillis)
+void MainClock::blinkBuzzer(unsigned long currentMillis)
+{
+	static bool buzzerStatus = LOW;
+	if (!digitalRead(switchAlarmPin)) {
+		noTone(buzzerpin);
+		return;
+	}
+
+	if (currentMillis - lastUpdateBuzzerTime >= BUZZER_BLINK_DELAY) {
+		lastUpdateBuzzerTime = currentMillis;
+		buzzerStatus = !buzzerStatus;
+		if (buzzerStatus)
+			tone(buzzerpin, 440);
+		else
+			noTone(buzzerpin);
+	}
+}
+
+void MainClock::blinkAnimation(unsigned long currentMillis)
 {
 	if (!isAlarmActive)
 		return;
@@ -151,77 +190,77 @@ void Clock::blinkAnimation(unsigned long currentMillis)
 	}
 }
 
-Display *Clock::getDisplay()
+Display *MainClock::getDisplay()
 {
 	return display;
 }
 
-Time *Clock::getTimeObj()
+Time *MainClock::getTimeObj()
 {
 	return currentTime;
 }
 
-Time *Clock::getAlarmObj()
+Time *MainClock::getAlarmObj()
 {
 	return alarmTime;
 }
 
-Button *Clock::getBtnHours()
+Button *MainClock::getBtnHours()
 {
 	return btnHours;
 }
 
-Button *Clock::getBtnMinutes()
+Button *MainClock::getBtnMinutes()
 {
 	return btnMinutes;
 }
 
-Button *Clock::getBtnTimeOption()
+Button *MainClock::getBtnTimeOption()
 {
 	return btnTimeOption;
 }
 
-Button *Clock::getBtnAlarmOption()
+Button *MainClock::getBtnAlarmOption()
 {
 	return btnAlarmOption;
 }
 
-void Clock::setDisplay(Display *display)
+void MainClock::setDisplay(Display *display)
 {
 	this->display = display;
 }
 
-void Clock::setTimeObj(Time *time)
+void MainClock::setTimeObj(Time *time)
 {
 	currentTime = time;
 }
 
-void Clock::setAlarmObj(Time *time)
+void MainClock::setAlarmObj(Time *time)
 {
 	alarmTime = time;
 }
 
-void Clock::setBtnHours(Button *btn)
+void MainClock::setBtnHours(Button *btn)
 {
 	btnHours = btn;
 }
 
-void Clock::setBtnMinutes(Button *btn)
+void MainClock::setBtnMinutes(Button *btn)
 {
 	btnMinutes = btn;
 }
 
-void Clock::setBtnTimeOption(Button *btn)
+void MainClock::setBtnTimeOption(Button *btn)
 {
 	btnTimeOption = btn;
 }
 
-void Clock::setBtnAlarmOption(Button *btn)
+void MainClock::setBtnAlarmOption(Button *btn)
 {
 	btnAlarmOption = btn;
 }
 
-void Clock::init()
+void MainClock::init()
 {
 	pinMode(ledPin, OUTPUT);
 
@@ -229,7 +268,7 @@ void Clock::init()
 	alarmTime->setTime(12, 11, 0);
 }
 
-void Clock::checkAlarm()
+void MainClock::checkAlarm()
 {
 	if (currentTime->getHours() != alarmTime->getHours() || currentTime->getMinutes() != alarmTime->getMinutes()) {
 		isAlarmActive = false;
@@ -238,7 +277,7 @@ void Clock::checkAlarm()
 	isAlarmActive = true;
 }
 
-void Clock::update(unsigned long currentMillis)
+void MainClock::update(unsigned long currentMillis)
 {
 	// Update Buttons State
 	btnHours->update(currentMillis);
@@ -251,14 +290,16 @@ void Clock::update(unsigned long currentMillis)
 	checkAlarm();
 
 	// Blink led
-	if (isAlarmActive)
+	if (isAlarmActive) {
 		blinkLed(currentMillis);
+		blinkBuzzer(buzzerpin);
+	}
 
 	// Animation setup
 	blinkAnimation(currentMillis);
 }
 
-void Clock::draw()
+void MainClock::draw()
 {
 	// Setup animation
 	if (isAlarmActive && isAnimActive && digitalRead(switchAlarmPin)) {
@@ -282,7 +323,7 @@ void Clock::draw()
 	displayAlarm();
 }
 
-void Clock::schedIncrement()
+void MainClock::schedIncrement()
 {
 	currentTime->incrementSeconds();
 }
