@@ -52,7 +52,14 @@
       "rotate": 90,
       "attrs": { "color": "yellow", "key": "4" }
     },
-    { "type": "wokwi-slide-switch", "id": "sw1", "top": -110.8, "left": 185.5, "attrs": {} }
+    { "type": "wokwi-slide-switch", "id": "sw1", "top": -82, "left": 214.3, "attrs": {} },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": -256.8,
+      "left": 165,
+      "attrs": { "volume": "0.1" }
+    }
   ],
   "connections": [
     [ "esp:TX0", "$serialMonitor:RX", "", [] ],
@@ -74,7 +81,9 @@
     [ "btn4:1.r", "esp:D26", "yellow", [ "v48.2", "h-163.2", "v124.8" ] ],
     [ "esp:D5", "sw1:2", "magenta", [ "h0" ] ],
     [ "esp:GND.1", "sw1:3", "black", [ "h47.7", "v-105.7", "h76.8" ] ],
-    [ "sw1:1", "esp:3V3", "red", [ "v38.4", "h-76.8", "v172.8" ] ]
+    [ "sw1:1", "esp:3V3", "red", [ "v38.4", "h-76.8", "v172.8" ] ],
+    [ "esp:GND.1", "bz1:1", "black", [ "h47.7", "v-230.5", "h57.6" ] ],
+    [ "esp:D19", "bz1:2", "cyan", [ "h0" ] ]
   ],
   "dependencies": {}
 }

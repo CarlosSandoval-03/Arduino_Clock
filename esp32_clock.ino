@@ -20,10 +20,13 @@ Button buttonAlarmOption(26);
 Button buttonHours(33);
 Button buttonMinutes(32);
 const int switchPin = 5;
+const int buzzerPin = 19;
 const int ledPin = 13;
 
-Main_Clock main_clock(&display, &currentTime, &alarmTime, &buttonHours, &buttonMinutes, &buttonTimeOption,
-											&buttonAlarmOption, switchPin, ledPin);
+ClockConfig config = { &display,					&currentTime,				&alarmTime, &buttonHours, &buttonMinutes,
+											 &buttonTimeOption, &buttonAlarmOption, switchPin,	buzzerPin,		ledPin };
+
+MainClock clockobj(&config);
 unsigned long currentMillis;
 
 void setup()
@@ -38,8 +41,8 @@ void setup()
 	}
 	display.clearDisplay();
 
-	// Initialize main_clock
-	main_clock.init();
+	// Initialize MainClock
+	clockobj.init();
 
 	// Sched the interrupt (1 sec - updateTime func)
 	timer = timerBegin(0, 80, true); // Timer 0, divisor de reloj 80
@@ -51,14 +54,14 @@ void setup()
 void loop()
 {
 	currentMillis = millis();
-	main_clock.update(currentMillis);
+	clockobj.update(currentMillis);
 	display.clearDisplay();
-	main_clock.draw();
+	clockobj.draw();
 	display.display();
 	delay(100);
 }
 
 void updateTime()
 {
-	main_clock.schedIncrement();
+	clockobj.schedIncrement();
 }
